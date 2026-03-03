@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spotify Cover Grabber</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Animated background blobs -->
+  <div class="bg-animation">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="blob blob-5"></div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="logo">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="#1DB954">
+          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+        </svg>
+        <h1>Spotify Cover Grabber</h1>
+      </div>
+      <p class="subtitle">Paste any Spotify link to grab its cover art — no API key needed</p>
+    </header>
+
+    <main>
+      <div class="input-section">
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="spotifyUrl"
+            placeholder="https://open.spotify.com/track/..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="grabBtn" onclick="grabCover()">
+            <span class="btn-text">Grab Cover</span>
+            <span class="btn-loader" hidden>
+              <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+            </span>
+          </button>
+        </div>
+        <div id="errorMsg" class="error-msg" hidden></div>
+        <div class="supported-types">
+          <span class="type-badge">Track</span>
+          <span class="type-badge">Album</span>
+          <span class="type-badge">Artist</span>
+          <span class="type-badge">Playlist</span>
+          <span class="type-badge">Podcast</span>
+          <span class="type-badge">Episode</span>
+        </div>
+      </div>
+
+      <div id="result" class="result-section" hidden>
+        <div class="cover-card">
+          <div class="cover-image-wrapper">
+            <img id="coverImage" src="" alt="Cover Art" />
+            <div class="cover-overlay">
+              <a id="downloadLink" href="#" onclick="downloadCover(); return false;" title="Download cover">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="white"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+              </a>
+            </div>
+          </div>
+          <div class="cover-info">
+            <span id="coverType" class="cover-type-badge"></span>
+            <h2 id="coverTitle"></h2>
+            <p id="coverArtist" class="cover-artist"></p>
+            <div class="cover-actions">
+              <a id="openSpotify" href="#" target="_blank" class="btn-open-spotify">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                Open in Spotify
+              </a>
+              <button id="copyUrlBtn" class="btn-copy" onclick="copyCoverUrl()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                Copy Image URL
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>Uses Spotify's public oEmbed endpoint &middot; No API key required</p>
+    </footer>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
